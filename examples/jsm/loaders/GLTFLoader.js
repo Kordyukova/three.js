@@ -1979,7 +1979,6 @@ var GLTFLoader = ( function () {
 
 		var geometry = mesh.geometry;
 		var material = mesh.material;
-		var extensions = this.extensions;
 
 		var useVertexTangents = geometry.attributes.tangent !== undefined;
 		var useVertexColors = geometry.attributes.color !== undefined;
@@ -2156,15 +2155,24 @@ var GLTFLoader = ( function () {
 
 		}
 
-		var alphaMode = materialDef.alphaMode;
+		var alphaMode = materialDef.alphaMode || ALPHA_MODES.OPAQUE;
 
 		if ( alphaMode === ALPHA_MODES.BLEND ) {
 
 			materialParams.transparent = true;
 
-		} else if ( alphaMode === ALPHA_MODES.MASK ) {
+			// See: https://github.com/mrdoob/three.js/issues/17706
+			materialParams.depthWrite = false;
 
-			materialParams.alphaTest = materialDef.alphaCutoff !== undefined ? materialDef.alphaCutoff : 0.5;
+		} else {
+
+			materialParams.transparent = false;
+
+			if ( alphaMode === ALPHA_MODES.MASK ) {
+
+				materialParams.alphaTest = materialDef.alphaCutoff !== undefined ? materialDef.alphaCutoff : 0.5;
+
+			}
 
 		}
 
